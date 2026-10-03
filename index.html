@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spiritual Science Research Foundation - Request & Inventory Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        ssrfSky: '#e0f2fe',
+                        ssrfHeaderBlue: '#1a75bb',
+                        ssrfAccentYellow: '#fde047',
+                        ssrfCream: '#fffdf5',
+                        ssrfBorder: '#bae6fd'
+                    },
+                    fontFamily: {
+                        sans: ['Open Sans', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #fbfbf6;
+            font-family: 'Open Sans', sans-serif;
+            color: #333333;
+        }
+        .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between">
+
+    <!-- Top Header Bar -->
+    <header class="bg-white border-b border-sky-100 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 py-3 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
+            
+            <!-- Logo & Brand Title -->
+            <div class="flex items-center space-x-4">
+                <!-- SVG Logo based on user provided meditating silhouette image -->
+                <div class="w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 rounded-full overflow-hidden border-2 border-sky-200 shadow-inner bg-sky-100">
+                    <svg viewBox="0 0 200 200" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Sky Background -->
+                        <rect x="0" y="0" width="200" height="150" fill="#9be0ff" />
+                        <!-- Grass Ground -->
+                        <rect x="0" y="150" width="200" height="50" fill="#8bc34a" />
+                        
+                        <!-- Meditating Silhouette with Yellow Aura -->
+                        <g transform="translate(100, 115)">
+                            <!-- Outer Aura Glow -->
+                            <path d="M 0,-65 
+                                     C 18,-65 28,-50 28,-36 
+                                     C 28,-22 40,-12 55,0 
+                                     C 68,10 72,26 62,38 
+                                     C 52,50 35,55 0,55 
+                                     C -35,55 -52,50 -62,38 
+                                     C -72,26 -68,10 -55,0 
+                                     C -40,-12 -28,-22 -28,-36 
+                                     C -28,-50 -18,-65 0,-65 Z" 
+                                  fill="#ffeb3b" stroke="#fbc02d" stroke-width="4"/>
+                            
+                            <!-- Inner Blue Silhouette -->
+                            <path d="M 0,-55 
+                                     C 13,-55 20,-43 20,-30 
+                                     C 20,-18 30,-8 44,2 
+                                     C 54,10 56,22 48,32 
+                                     C 40,40 25,45 0,45 
+                                     C -25,45 -40,40 -48,32 
+                                     C -56,22 -54,10 -44,2 
+                                     C -30,-8 -20,-18 -20,-30 
+                                     C -20,-43 -13,-55 0,-55 Z" 
+                                  fill="#0288d1"/>
+                        </g>
+                    </svg>
+                </div>
+                
+                <div>
+                    <h1 class="text-xl sm:text-2xl font-bold text-sky-900 leading-tight">Spiritual Science Research Foundation</h1>
+                    <p class="text-xs sm:text-sm text-sky-700 italic">Bridging the known and unknown worlds</p>
+                </div>
+            </div>
+
+            <!-- Navigation Links & Admin Controls -->
+            <div class="flex items-center space-x-3 sm:space-x-4 text-xs sm:text-sm">
+                <button id="navUserBtn" onclick="switchView('user')" class="px-4 py-2 rounded-md font-semibold bg-sky-700 text-white shadow hover:bg-sky-800 transition-colors">
+                    Seeker Form
+                </button>
+                <button id="navAdminBtn" onclick="openAdminAuthModal()" class="px-4 py-2 rounded-md font-semibold bg-amber-500 text-white shadow hover:bg-amber-600 transition-colors">
+                    Admin Portal
+                </button>
+            </div>
+        </div>
+        
+        <!-- SSRF Style Light Blue Sub-Header Ribbon -->
+        <div class="bg-sky-100 border-t border-sky-200 py-1.5 px-4 text-center text-xs text-sky-800 font-medium">
+            Ashram Daily Material & Requisition Portal
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 py-6 sm:px-6 lg:px-8 flex-grow w-full">
+
+        <!-- USER / SEEKER REQUEST VIEW -->
+        <section id="userView" class="space-y-6">
+            <div class="bg-white rounded-xl shadow-md border border-sky-100 overflow-hidden">
+                <!-- Header Banner -->
+                <div class="bg-gradient-to-r from-sky-600 to-sky-800 p-6 text-white text-center">
+                    <h2 class="text-2xl sm:text-3xl font-semibold tracking-wide">Namaskar, please submit request</h2>
+                    <p class="text-sky-100 text-sm mt-1">Please select the items and quantities required for your room stay.</p>
+                </div>
+
+                <div class="p-6 sm:p-8 space-y-6">
+                    <!-- Notification Banner -->
+                    <div id="userAlert" class="hidden p-4 rounded-md text-sm font-medium transition-all"></div>
+
+                    <!-- Personal Information -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">Full Name <span class="text-red-500">*</span></label>
+                            <input type="text" id="seekerName" placeholder="e.g. John Doe" class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition-all">
+                            <span class="text-xs text-gray-400 mt-1 block">Case-sensitive: Re-submitting with exact same name merges items into existing request.</span>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">Room Number <span class="text-red-500">*</span></label>
+                            <input type="text" id="seekerRoom" placeholder="e.g. A-102" class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition-all">
+                        </div>
+                    </div>
+
+                    <!-- Item Selector & Quantity Add Section -->
+                    <div class="bg-sky-50/60 rounded-xl p-5 border border-sky-100">
+                        <h3 class="text-sm font-bold text-sky-900 uppercase tracking-wider mb-3">Add Items to Your Basket</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 items-end">
+                            <div class="sm:col-span-6">
+                                <label class="block text-xs font-medium text-gray-600 mb-1">Select Item</label>
+                                <select id="itemSelect" class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-sky-500 bg-white outline-none">
+                                    <!-- Populated dynamically -->
+                                </select>
+                            </div>
+                            <div class="sm:col-span-3">
+                                <label class="block text-xs font-medium text-gray-600 mb-1">Quantity</label>
+                                <input type="number" id="itemQty" min="1" max="50" value="1" class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-sky-500 outline-none">
+                            </div>
+                            <div class="sm:col-span-3">
+                                <button type="button" onclick="addItemToBasket()" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-semibold py-2 px-4 rounded-lg shadow-sm transition-all flex items-center justify-center space-x-1">
+                                    <span>+ Add Item</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Current Basket Table -->
+                    <div>
+                        <h3 class="text-sm font-bold text-gray-700 mb-2">Requested Items Basket:</h3>
+                        <div class="border border-gray-200 rounded-lg overflow-hidden">
+                            <table class="min-w-full divide-y divide-gray-200 text-sm">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">Item Name</th>
+                                        <th class="px-4 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase">Qty</th>
+                                        <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 uppercase">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="basketTableBody" class="divide-y divide-gray-200 bg-white">
+                                    <tr>
+                                        <td colspan="3" class="px-4 py-4 text-center text-gray-400 italic">No items added to basket yet.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Submit Request Button -->
+                    <div class="pt-2">
+                        <button onclick="submitSeekerRequest()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transition-all transform active:scale-95 text-center text-lg">
+                            Submit Request
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ADMIN PORTAL VIEW -->
+        <section id="adminView" class="hidden space-y-6">
+            <!-- Admin Top Navigation Tabs -->
+            <div class="bg-white p-3 rounded-xl shadow-sm border border-sky-100 flex flex-wrap justify-between items-center gap-4">
+                <div class="flex space-x-2">
+                    <button onclick="switchAdminTab('requests')" id="tabBtnRequests" class="px-4 py-2 rounded-lg font-semibold text-sm transition-all bg-sky-700 text-white shadow-sm">
+                        Seeker Requests
+                    </button>
+                    <button onclick="switchAdminTab('inventory')" id="tabBtnInventory" class="px-4 py-2 rounded-lg font-semibold text-sm transition-all text-gray-600 hover:bg-sky-50">
+                        Ashram Inventory
+                    </button>
+                    <button onclick="switchAdminTab('shortages')" id="tabBtnShortages" class="px-4 py-2 rounded-lg font-semibold text-sm transition-all text-gray-600 hover:bg-sky-50 flex items-center space-x-1">
+                        <span>More Required</span>
+                        <span id="shortageBadge" class="hidden bg-red-500 text-white text-xs px-2 py-0.5 rounded-full font-bold">0</span>
+                    </button>
+                </div>
+                <button onclick="logoutAdmin()" class="text-xs font-bold text-red-600 hover:text-red-800 px-3 py-1.5 border border-red-200 hover:border-red-400 rounded-md transition-colors">
+                    Logout Admin
+                </button>
+            </div>
+
+            <!-- TAB 1: SEEKER REQUESTS LIST -->
+            <div id="adminRequestsTab" class="bg-white rounded-xl shadow-md border border-sky-100 p-6 space-y-4">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-bold text-sky-900">Active Seeker Requests (Newest First)</h3>
+                    <button onclick="clearAllRequests()" class="text-xs text-gray-500 hover:text-red-600 underline">Clear Completed Requests</button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200 text-sm">
+                        <thead class="bg-sky-50">
+                            <tr>
+                                <th class="px-4 py-3 text-left font-semibold text-sky-900">Timestamp</th>
+                                <th class="px-4 py-3 text-left font-semibold text-sky-900">Seeker Full Name</th>
+                                <th class="px-4 py-3 text-left font-semibold text-sky-900">Room No.</th>
+                                <th class="px-4 py-3 text-left font-semibold text-sky-900">Requested Items & Quantities</th>
+                                <th class="px-4 py-3 text-center font-semibold text-sky-900">Status / Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminRequestsTableBody" class="divide-y divide-gray-100">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TAB 2: ASHRAM INVENTORY MANAGEMENT -->
+            <div id="adminInventoryTab" class="hidden bg-white rounded-xl shadow-md border border-sky-100 p-6 space-y-4">
+                <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+                    <h3 class="text-lg font-bold text-sky-900">Ashram Inventory Management</h3>
+                    <div class="flex items-center space-x-2">
+                        <input type="text" id="newItemName" placeholder="New item name..." class="px-3 py-1.5 border rounded-lg text-sm outline-none focus:ring-1 focus:ring-sky-500">
+                        <input type="number" id="newItemQty" placeholder="Qty" min="0" value="10" class="w-20 px-3 py-1.5 border rounded-lg text-sm outline-none focus:ring-1 focus:ring-sky-500">
+                        <button onclick="addNewInventoryItem()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors">+ Add Item</button>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="inventoryGrid">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+
+            <!-- TAB 3: MORE REQUIRED / SHORTAGE DASHBOARD -->
+            <div id="adminShortagesTab" class="hidden bg-white rounded-xl shadow-md border border-sky-100 p-6 space-y-4">
+                <div>
+                    <h3 class="text-lg font-bold text-sky-900">More Required Page (Out of Stock Demand)</h3>
+                    <p class="text-xs text-gray-500">Items requested by seekers that were out of stock or exceeded available inventory.</p>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200 text-sm">
+                        <thead class="bg-red-50">
+                            <tr>
+                                <th class="px-4 py-3 text-left font-semibold text-red-900">Item Name</th>
+                                <th class="px-4 py-3 text-center font-semibold text-red-900">Shortage / Units Required</th>
+                                <th class="px-4 py-3 text-left font-semibold text-red-900">Affected Seekers</th>
+                                <th class="px-4 py-3 text-center font-semibold text-red-900">Quick Restock Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminShortageTableBody" class="divide-y divide-gray-100">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-sky-900 text-sky-200 py-4 text-center text-xs mt-8">
+        <p>© Spiritual Science Research Foundation (SSRF). All Rights Reserved.</p>
+    </footer>
+
+    <!-- ADMIN LOGIN MODAL -->
+    <div id="adminAuthModal" class="fixed inset-0 modal-backdrop hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-xl shadow-2xl border border-sky-200 max-w-md w-full p-6 space-y-4">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="text-lg font-bold text-sky-900">Admin Portal Authentication</h3>
+                <button onclick="closeAdminAuthModal()" class="text-gray-400 hover:text-gray-600 text-lg font-bold">&times;</button>
+            </div>
+            
+            <div id="adminAuthError" class="hidden p-3 rounded bg-red-100 text-red-700 text-xs font-semibold"></div>
+
+            <form onsubmit="handleAdminLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Username</label>
+                    <input type="text" id="adminUser" placeholder="Enter username (SRC)" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-sky-500 outline-none text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Password</label>
+                    <input type="password" id="adminPass" placeholder="Enter password (SSRF)" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-sky-500 outline-none text-sm">
+                </div>
+                <div class="text-xs text-gray-400 italic">Credentials are case-sensitive.</div>
+                <div class="flex justify-end space-x-2 pt-2">
+                    <button type="button" onclick="closeAdminAuthModal()" class="px-4 py-2 border border-gray-300 rounded-lg text-xs font-bold text-gray-600 hover:bg-gray-50">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-xs font-bold shadow">Login</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Default Initial Inventory Items if LocalStorage is empty
+        const DEFAULT_INVENTORY = {
+            "Pillow": 15,
+            "Bed Sheet": 20,
+            "Blanket": 10,
+            "Yoga Mat": 8,
+            "Water Bottle": 25,
+            "Meditation Cushion": 5,
+            "Towel": 12,
+            "Lamp": 0 // Initialized as out of stock for testing
+        };
+
+        // Application State
+        let currentBasket = []; // [{ item: "Pillow", qty: 2 }]
+        let isAdminLoggedIn = false;
+
+        // Initialize Application
+        window.addEventListener('DOMContentLoaded', () => {
+            initLocalStorage();
+            populateItemDropdown();
+            renderBasketTable();
+        });
+
+        // Initialize LocalStorage Data Structures
+        function initLocalStorage() {
+            if (!localStorage.getItem('ssrf_inventory')) {
+                localStorage.setItem('ssrf_inventory', JSON.stringify(DEFAULT_INVENTORY));
+            }
+            if (!localStorage.getItem('ssrf_requests')) {
+                localStorage.setItem('ssrf_requests', JSON.stringify([]));
+            }
+            if (!localStorage.getItem('ssrf_shortages')) {
+                localStorage.setItem('ssrf_shortages', JSON.stringify({}));
+            }
+        }
+
+        // Get LocalStorage Helpers
+        function getInventory() {
+            return JSON.parse(localStorage.getItem('ssrf_inventory')) || {};
+        }
+
+        function saveInventory(inv) {
+            localStorage.setItem('ssrf_inventory', JSON.stringify(inv));
+        }
+
+        function getRequests() {
+            return JSON.parse(localStorage.getItem('ssrf_requests')) || [];
+        }
+
+        function saveRequests(reqs) {
+            localStorage.setItem('ssrf_requests', JSON.stringify(reqs));
+        }
+
+        function getShortages() {
+            return JSON.parse(localStorage.getItem('ssrf_shortages')) || {};
+        }
+
+        function saveShortages(shortages) {
+            localStorage.setItem('ssrf_shortages', JSON.stringify(shortages));
+        }
+
+        // Populate Dropdown for Seeker Item Selection
+        function populateItemDropdown() {
+            const select = document.getElementById('itemSelect');
+            const inventory = getInventory();
+            select.innerHTML = '';
+
+            Object.keys(inventory).forEach(itemName => {
+                const opt = document.createElement('option');
+                opt.value = itemName;
+                const stock = inventory[itemName];
+                opt.textContent = `${itemName} (${stock > 0 ? stock + ' in stock' : 'OUT OF STOCK'})`;
+                select.appendChild(opt);
+            });
+        }
+
+        // Add Item to Current User Basket
+        function addItemToBasket() {
+            const itemSelect = document.getElementById('itemSelect');
+            const qtyInput = document.getElementById('itemQty');
+            const selectedItem = itemSelect.value;
+            const qty = parseInt(qtyInput.value) || 1;
+
+            if (!selectedItem) {
+                showUserAlert('Please select an item.', 'bg-red-100 text-red-700');
+                return;
+            }
+
+            if (qty <= 0) {
+                showUserAlert('Quantity must be at least 1.', 'bg-red-100 text-red-700');
+                return;
+            }
+
+            // Check if item already exists in local basket
+            const existingIndex = currentBasket.findIndex(i => i.item === selectedItem);
+            if (existingIndex > -1) {
+                currentBasket[existingIndex].qty += qty;
+            } else {
+                currentBasket.push({ item: selectedItem, qty: qty });
+            }
+
+            renderBasketTable();
+            qtyInput.value = 1;
+            showUserAlert(`Added ${qty}x ${selectedItem} to basket.`, 'bg-emerald-100 text-emerald-800');
+        }
+
+        // Remove Item from Basket
+        function removeFromBasket(index) {
+            currentBasket.splice(index, 1);
+            renderBasketTable();
+        }
+
+        // Render Current Basket Table
+        function renderBasketTable() {
+            const tbody = document.getElementById('basketTableBody');
+            if (currentBasket.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" class="px-4 py-4 text-center text-gray-400 italic">No items added to basket yet. Select an item above.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = currentBasket.map((b, idx) => `
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-2.5 font-medium text-gray-800">${escapeHtml(b.item)}</td>
+                    <td class="px-4 py-2.5 text-center font-semibold text-gray-700">${b.qty}</td>
+                    <td class="px-4 py-2.5 text-right">
+                        <button onclick="removeFromBasket(${idx})" class="text-xs font-bold text-red-500 hover:text-red-700">Remove</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Submit Seeker Request Function
+        function submitSeekerRequest() {
+            const nameInput = document.getElementById('seekerName');
+            const roomInput = document.getElementById('seekerRoom');
+            const name = nameInput.value.trim();
+            const room = roomInput.value.trim();
+
+            if (!name || !room) {
+                showUserAlert('Please fill in both Full Name and Room Number.', 'bg-red-100 text-red-700');
+                return;
+            }
+
+            if (currentBasket.length === 0) {
+                showUserAlert('Your request basket is empty. Please add at least one item.', 'bg-red-100 text-red-700');
+                return;
+            }
+
+            let inventory = getInventory();
+            let requests = getRequests();
+            let shortages = getShortages();
+
+            // Track any stock deficits for the "More Required" page
+            let shortagesAdded = false;
+
+            // Process inventory deduction & check stock availability
+            currentBasket.forEach(reqItem => {
+                const itemName = reqItem.item;
+                const reqQty = reqItem.qty;
+                const currentStock = inventory[itemName] || 0;
+
+                if (currentStock >= reqQty) {
+                    // Deduct from available inventory
+                    inventory[itemName] -= reqQty;
+                } else {
+                    // Item is out of stock or partially available
+                    const deficit = reqQty - currentStock;
+                    inventory[itemName] = 0; // All remaining stock taken
+
+                    // Log shortage into "More Required" dashboard
+                    if (!shortages[itemName]) {
+                        shortages[itemName] = { needed: 0, seekers: [] };
+                    }
+                    shortages[itemName].needed += deficit;
+                    if (!shortages[itemName].seekers.includes(name)) {
+                        shortages[itemName].seekers.push(name);
+                    }
+                    shortagesAdded = true;
+                }
+            });
+
+            // Save updated inventory and shortages
+            saveInventory(inventory);
+            saveShortages(shortages);
+
+            // Exact Case-Sensitive Name Search for Merging Logic
+            const existingReqIndex = requests.findIndex(r => r.name === name);
+
+            if (existingReqIndex > -1) {
+                // Merge into existing seeker request
+                const existingReq = requests[existingReqIndex];
+                existingReq.room = room; // Update room if changed
+                existingReq.timestamp = new Date().toLocaleString(); // Refresh timestamp
+
+                currentBasket.forEach(newItem => {
+                    const existingItemObj = existingReq.items.find(i => i.item === newItem.item);
+                    if (existingItemObj) {
+                        existingItemObj.qty += newItem.qty;
+                    } else {
+                        existingReq.items.push({ item: newItem.item, qty: newItem.qty });
+                    }
+                });
+
+                // Move merged request to top (first asked / newest on top)
+                const mergedRequest = requests.splice(existingReqIndex, 1)[0];
+                requests.unshift(mergedRequest);
+
+                showUserAlert(`Namaskar ${name}. Exact matching name found; your new items have been merged into your active request!`, 'bg-sky-100 text-sky-800');
+            } else {
+                // Create brand new request entry
+                const newRequest = {
+                    id: Date.now().toString(),
+                    name: name,
+                    room: room,
+                    items: [...currentBasket],
+                    timestamp: new Date().toLocaleString(),
+                    status: 'Pending'
+                };
+                // Unshift to put newest at the top
+                requests.unshift(newRequest);
+
+                showUserAlert(`Namaskar ${name}. Your request has been successfully submitted!`, 'bg-emerald-100 text-emerald-800');
+            }
+
+            // Save requests to LocalStorage
+            saveRequests(requests);
+
+            // Reset basket & inputs
+            currentBasket = [];
+            renderBasketTable();
+            populateItemDropdown();
+
+            // Refresh Admin Views if currently open
+            if (isAdminLoggedIn) {
+                renderAdminRequests();
+                renderAdminInventory();
+                renderAdminShortages();
+            }
+        }
+
+        // Show User Alert Banner
+        function showUserAlert(msg, colorClasses) {
+            const alertBox = document.getElementById('userAlert');
+            alertBox.className = `p-4 rounded-md text-sm font-medium transition-all ${colorClasses}`;
+            alertBox.textContent = msg;
+            alertBox.classList.remove('hidden');
+
+            setTimeout(() => {
+                alertBox.classList.add('hidden');
+            }, 5000);
+        }
+
+        // View Switcher (User vs Admin)
+        function switchView(viewName) {
+            const userView = document.getElementById('userView');
+            const adminView = document.getElementById('adminView');
+
+            if (viewName === 'admin') {
+                if (!isAdminLoggedIn) {
+                    openAdminAuthModal();
+                    return;
+                }
+                userView.classList.add('hidden');
+                adminView.classList.remove('hidden');
+                renderAdminRequests();
+                renderAdminInventory();
+                renderAdminShortages();
+            } else {
+                userView.classList.remove('hidden');
+                adminView.classList.add('hidden');
+            }
+        }
+
+        // Admin Auth Modal Handlers
+        function openAdminAuthModal() {
+            if (isAdminLoggedIn) {
+                switchView('admin');
+            } else {
+                document.getElementById('adminAuthModal').classList.remove('hidden');
+            }
+        }
+
+        function closeAdminAuthModal() {
+            document.getElementById('adminAuthModal').classList.add('hidden');
+            document.getElementById('adminAuthError').classList.add('hidden');
+        }
+
+        function handleAdminLogin(e) {
+            e.preventDefault();
+            const u = document.getElementById('adminUser').value;
+            const p = document.getElementById('adminPass').value;
+            const errorDiv = document.getElementById('adminAuthError');
+
+            // Exact Case Sensitive Credentials check
+            if (u === 'SRC' && p === 'SSRF') {
+                isAdminLoggedIn = true;
+                closeAdminAuthModal();
+                switchView('admin');
+                document.getElementById('adminUser').value = '';
+                document.getElementById('adminPass').value = '';
+            } else {
+                errorDiv.textContent = 'Invalid credentials! Username and Password are case-sensitive.';
+                errorDiv.classList.remove('hidden');
+            }
+        }
+
+        function logoutAdmin() {
+            isAdminLoggedIn = false;
+            switchView('user');
+        }
+
+        // Switch Tabs within Admin Panel
+        function switchAdminTab(tab) {
+            const requestsTab = document.getElementById('adminRequestsTab');
+            const inventoryTab = document.getElementById('adminInventoryTab');
+            const shortagesTab = document.getElementById('adminShortagesTab');
+
+            const tabBtnRequests = document.getElementById('tabBtnRequests');
+            const tabBtnInventory = document.getElementById('tabBtnInventory');
+            const tabBtnShortages = document.getElementById('tabBtnShortages');
+
+            const inactiveClass = 'px-4 py-2 rounded-lg font-semibold text-sm transition-all text-gray-600 hover:bg-sky-50';
+            const activeClass = 'px-4 py-2 rounded-lg font-semibold text-sm transition-all bg-sky-700 text-white shadow-sm';
+
+            requestsTab.classList.add('hidden');
+            inventoryTab.classList.add('hidden');
+            shortagesTab.classList.add('hidden');
+
+            tabBtnRequests.className = inactiveClass;
+            tabBtnInventory.className = inactiveClass;
+            tabBtnShortages.className = inactiveClass;
+
+            if (tab === 'requests') {
+                requestsTab.classList.remove('hidden');
+                tabBtnRequests.className = activeClass;
+                renderAdminRequests();
+            } else if (tab === 'inventory') {
+                inventoryTab.classList.remove('hidden');
+                tabBtnInventory.className = activeClass;
+                renderAdminInventory();
+            } else if (tab === 'shortages') {
+                shortagesTab.classList.remove('hidden');
+                tabBtnShortages.className = activeClass;
+                renderAdminShortages();
+            }
+        }
+
+        // Render Admin Requests List
+        function renderAdminRequests() {
+            const requests = getRequests();
+            const tbody = document.getElementById('adminRequestsTableBody');
+
+            if (requests.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="px-4 py-6 text-center text-gray-400 italic">No seeker requests stored yet.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = requests.map((req, idx) => `
+                <tr class="hover:bg-sky-50/50">
+                    <td class="px-4 py-3 text-xs text-gray-500 whitespace-nowrap">${req.timestamp}</td>
+                    <td class="px-4 py-3 font-semibold text-sky-900">${escapeHtml(req.name)}</td>
+                    <td class="px-4 py-3 text-gray-700 font-medium">${escapeHtml(req.room)}</td>
+                    <td class="px-4 py-3">
+                        <div class="flex flex-wrap gap-1.5">
+                            ${req.items.map(i => `
+                                <span class="bg-sky-100 text-sky-800 text-xs px-2 py-1 rounded-md font-medium border border-sky-200">
+                                    ${escapeHtml(i.item)}: <strong class="text-sky-900">${i.qty}</strong>
+                                </span>
+                            `).join('')}
+                        </div>
+                    </td>
+                    <td class="px-4 py-3 text-center">
+                        <button onclick="fulfillRequest('${req.id}')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-3 py-1.5 rounded-md font-semibold transition-colors shadow-sm">
+                            Fulfill / Clear
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Mark Single Request Fulfilled
+        function fulfillRequest(id) {
+            let requests = getRequests();
+            requests = requests.filter(r => r.id !== id);
+            saveRequests(requests);
+            renderAdminRequests();
+        }
+
+        // Clear All Requests
+        function clearAllRequests() {
+            if (confirm("Are you sure you want to clear all seeker requests?")) {
+                saveRequests([]);
+                renderAdminRequests();
+            }
+        }
+
+        // Render Ashram Inventory Controls
+        function renderAdminInventory() {
+            const inventory = getInventory();
+            const grid = document.getElementById('inventoryGrid');
+            grid.innerHTML = '';
+
+            Object.keys(inventory).forEach(itemName => {
+                const stock = inventory[itemName];
+                const isOutOfStock = stock <= 0;
+
+                const card = document.createElement('div');
+                card.className = 'p-4 rounded-xl border border-gray-200 shadow-sm bg-white flex flex-col justify-between space-y-3';
+                
+                card.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <span class="font-bold text-gray-800 text-base">${escapeHtml(itemName)}</span>
+                        ${isOutOfStock 
+                            ? `<span class="bg-red-100 text-red-600 text-xs font-bold px-2 py-0.5 rounded-full uppercase">OUT OF STOCK</span>`
+                            : `<span class="bg-emerald-100 text-emerald-700 text-xs font-bold px-2 py-0.5 rounded-full uppercase">In Stock</span>`
+                        }
+                    </div>
+
+                    <div class="flex items-center justify-between pt-2">
+                        <div class="text-2xl font-extrabold ${isOutOfStock ? 'text-red-600' : 'text-emerald-600'}">
+                            ${stock} <span class="text-xs font-normal text-gray-500">units</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <button onclick="adjustInventory('${escapeHtml(itemName)}', -1)" class="w-8 h-8 rounded-lg border border-gray-300 bg-gray-50 hover:bg-gray-100 font-bold text-gray-700 flex items-center justify-center text-lg active:scale-95 transition-all">-</button>
+                            <button onclick="adjustInventory('${escapeHtml(itemName)}', 1)" class="w-8 h-8 rounded-lg border border-gray-300 bg-gray-50 hover:bg-gray-100 font-bold text-gray-700 flex items-center justify-center text-lg active:scale-95 transition-all">+</button>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // Adjust Inventory (+/-)
+        function adjustInventory(itemName, delta) {
+            let inventory = getInventory();
+            if (inventory[itemName] !== undefined) {
+                inventory[itemName] = Math.max(0, inventory[itemName] + delta);
+                saveInventory(inventory);
+                renderAdminInventory();
+                populateItemDropdown();
+            }
+        }
+
+        // Add Brand New Inventory Item
+        function addNewInventoryItem() {
+            const nameInput = document.getElementById('newItemName');
+            const qtyInput = document.getElementById('newItemQty');
+            const name = nameInput.value.trim();
+            const qty = parseInt(qtyInput.value) || 0;
+
+            if (!name) return;
+
+            let inventory = getInventory();
+            inventory[name] = qty;
+            saveInventory(inventory);
+
+            nameInput.value = '';
+            qtyInput.value = 10;
+            renderAdminInventory();
+            populateItemDropdown();
+        }
+
+        // Render "More Required" Shortage Dashboard
+        function renderAdminShortages() {
+            const shortages = getShortages();
+            const tbody = document.getElementById('adminShortageTableBody');
+            const badge = document.getElementById('shortageBadge');
+
+            const keys = Object.keys(shortages).filter(k => shortages[k].needed > 0);
+
+            if (keys.length > 0) {
+                badge.textContent = keys.length;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+
+            if (keys.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="px-4 py-6 text-center text-gray-400 italic">No inventory shortages reported at this time. All seeker demands are fulfilled.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = keys.map(itemName => {
+                const data = shortages[itemName];
+                return `
+                    <tr class="hover:bg-red-50/50">
+                        <td class="px-4 py-3 font-bold text-gray-800">${escapeHtml(itemName)}</td>
+                        <td class="px-4 py-3 text-center font-extrabold text-red-600">${data.needed} units</td>
+                        <td class="px-4 py-3 text-xs text-gray-600">${data.seekers.map(s => escapeHtml(s)).join(', ')}</td>
+                        <td class="px-4 py-3 text-center">
+                            <button onclick="quickRestock('${escapeHtml(itemName)}', ${data.needed})" class="bg-amber-500 hover:bg-amber-600 text-white text-xs px-3 py-1.5 rounded-md font-semibold transition-colors shadow-sm">
+                                Restock ${data.needed} Units
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Quick Restock Action for Shortages
+        function quickRestock(itemName, amount) {
+            let inventory = getInventory();
+            let shortages = getShortages();
+
+            inventory[itemName] = (inventory[itemName] || 0) + amount;
+            delete shortages[itemName];
+
+            saveInventory(inventory);
+            saveShortages(shortages);
+
+            renderAdminShortages();
+            renderAdminInventory();
+            populateItemDropdown();
+        }
+
+        // Helper Utility to Escape HTML
+        function escapeHtml(str) {
+            return String(str).replace(/[&<>"']/g, function (m) {
+                return {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#039;'
+                }[m];
+            });
+        }
+    </script>
+</body>
+</html>
