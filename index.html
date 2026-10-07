@@ -313,7 +313,7 @@
             "Water Bottle": 25,
             "Meditation Cushion": 5,
             "Towel": 12,
-            "Lamp": 0 // Initialized as out of stock for testing
+            "Lamp": 0 
         };
 
         // Application State
@@ -426,9 +426,9 @@
 
             tbody.innerHTML = currentBasket.map((b, idx) => `
                 <tr class="hover:bg-gray-50">
-                    <td class="px-4 py-2.5 font-medium text-gray-800">${escapeHtml(b.item)}</td>
-                    <td class="px-4 py-2.5 text-center font-semibold text-gray-700">${b.qty}</td>
-                    <td class="px-4 py-2.5 text-right">
+                    <td class="px-5 py-2.5 font-medium text-gray-800">${escapeHtml(b.item)}</td>
+                    <td class="px-5 py-2.5 text-center font-semibold text-gray-700">${b.qty}</td>
+                    <td class="px-5 py-2.5 text-right">
                         <button onclick="removeFromBasket(${idx})" class="text-xs font-bold text-red-500 hover:text-red-700">Remove</button>
                     </td>
                 </tr>
